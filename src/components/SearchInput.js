@@ -2,16 +2,14 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { TextField, Button } from '@material-ui/core';
+import { getPhotos } from '../request/api';
 
 function SearchInput() {
   const history = useHistory();
 
-  const [state, setState] = useState({
-    value: '',
-  });
+  const [value, setValue] = useState('');
 
   const suggestions = [
     { name: 'Poland' },
@@ -35,64 +33,37 @@ function SearchInput() {
   ];
 
   const filteredSuggestions = suggestions.filter((suggestion) => (
-    suggestion.name.toLowerCase().includes(state.value.toLowerCase())));
+    suggestion.name.toLowerCase().includes(value.toLowerCase())));
 
   const handleChange = (e) => {
-    setState({
-      ...state,
-      value: e.target.value,
-    });
+    setValue(e.target.value);
   };
 
-  const getPhotos = (e, name) => {
+  const getResults = async (e, name) => {
     e.preventDefault();
 
-    axios.get(`https://api.unsplash.com/search/photos/?query=${!name ? state.value : name}&client_id=fbWKJHeHzYm5bcbbN1Q08wtGdxe4EXZGheW1hVUDhA0`)
-      .then((res) => {
-        let location;
-        if (!name) {
-          location = {
-            pathname: `/photos/${state.value}`,
-            state: {
-              keyword: state.value,
-              data: res.data,
-            },
-          };
-        } else {
-          location = {
-            pathname: `/photos/${name}`,
-            state: {
-              keyword: name,
-              data: res.data,
-            },
-          };
-        }
+    const results = await getPhotos(value, name);
 
-        history.push(location);
-        setState({
-          ...state,
-          value: '',
-        });
-      });
+    history.push(results);
+    setValue('');
   };
 
   return (
     <>
       <form onSubmit={getPhotos} className="search">
-        <TextField id="outlined-basic" label="Search free high-resolution photos" variant="outlined" value={state.value} onChange={handleChange} autoComplete="off" />
+        <TextField id="outlined-basic" label="Search free high-resolution photos" variant="outlined" value={value} onChange={handleChange} autoComplete="off" />
         <Button variant="contained" color="primary" type="submit">Search</Button>
-        {state.value.length > 2 ? (
+        {value.length > 2 ? (
           <ul className="autocomplete">
             {filteredSuggestions.length === 0 ? (
               <li>
                 Brak
               </li>
-            )
-              : filteredSuggestions.map((suggestion, index) => (
-                <li key={index} onClick={(e) => getPhotos(e, suggestion.name)}>
-                  {suggestion.name}
-                </li>
-              ))}
+            ) : filteredSuggestions.map((suggestion, index) => (
+              <li key={index} onClick={(e) => getResults(e, suggestion.name)}>
+                {suggestion.name}
+              </li>
+            ))}
           </ul>
         ) : '' }
       </form>

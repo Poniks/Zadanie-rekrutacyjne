@@ -3,24 +3,17 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, Avatar, Typography } from '@material-ui/core';
-import axios from 'axios';
+import { getPhotoLocation } from '../request/api';
 
 function ShowDetails({ result }) {
   const [open, setOpen] = useState(false);
 
-  const [state, setState] = useState({
-    location: '',
-  });
+  const [location, setLocation] = useState('');
 
-  const handleDialog = () => {
+  const handleDialog = async () => {
     if (!open) {
-      axios.get(`https://api.unsplash.com/photos/${result.id}/?client_id=fbWKJHeHzYm5bcbbN1Q08wtGdxe4EXZGheW1hVUDhA0`)
-        .then((res) => {
-          setState({
-            ...state,
-            location: res.data.location.title,
-          });
-        });
+      const photoLocation = await getPhotoLocation(result.id);
+      setLocation(photoLocation);
     }
     setOpen(!open);
   };
@@ -47,7 +40,7 @@ function ShowDetails({ result }) {
         </div>
         <img src={result.urls.regular} alt="" />
         <Typography variant="caption" display="block" gutterBottom>
-          {state.location}
+          {location}
         </Typography>
       </Dialog>
     </>
