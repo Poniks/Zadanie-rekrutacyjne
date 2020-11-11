@@ -50,7 +50,7 @@ function SearchInput() {
 
   return (
     <>
-      <form onSubmit={getPhotos} className="search">
+      <form onSubmit={getResults} className="search">
         <TextField id="outlined-basic" label="Search free high-resolution photos" variant="outlined" value={value} onChange={handleChange} autoComplete="off" />
         <Button variant="contained" color="primary" type="submit">Search</Button>
         {value.length > 2 ? (
